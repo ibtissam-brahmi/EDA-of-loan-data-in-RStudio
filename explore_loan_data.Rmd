@@ -5,9 +5,22 @@ date: "9 septembre 2018"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r}
+getwd()
+df=read.csv('prosperLoanData.csv')
 ```
+> We can see the variables descriptions of the data at the link
+> https://docs.google.com/spreadsheets/d/1gDyi_L4UvIrLTEC6Wri5nbaMmkGmLQBk-Yx3z0XDEtI/edit#gid=0
 
-## R Markdown
-
+>To help ourselves understnd the variables and the relationship between them and answer relevant questions, and since we have 81 variables, we'll select the key ones by subseting df.
+> We'll choose  
+LoanOriginalAmount
+BorrowerRate
+LoanStatus
+IncomeRange
+BorrowerState
+ListingCategory
+EmploymentStatus
+CurrentCreditLines
+ListingKey
+LoanKey
