@@ -14,13 +14,13 @@ df=read.csv('prosperLoanData.csv')
 
 >To help ourselves understnd the variables and the relationship between them and answer relevant questions, and since we have 81 variables, we'll select the key ones by subseting df.
 > We'll choose  
-LoanOriginalAmount
-BorrowerRate
-LoanStatus
-IncomeRange
-BorrowerState
-ListingCategory
-EmploymentStatus
-CurrentCreditLines
-ListingKey
-LoanKey
+>LoanOriginalAmount
+>BorrowerRate
+>LoanStatus
+>IncomeRange
+>BorrowerState
+>ListingCategory
+>EmploymentStatus
+>CurrentCreditLines
+>ListingKey
+>LoanKey
