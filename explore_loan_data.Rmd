@@ -1,18 +1,20 @@
 ---
-title: "explor_loan_data"
+title: "Explore_Loan_Data"
 author: "Brahmi Ibtissam"
 date: "9 septembre 2018"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 getwd()
 df=read.csv('prosperLoanData.csv')
 ```
 > We can see the variables descriptions of the data at the link
 > https://docs.google.com/spreadsheets/d/1gDyi_L4UvIrLTEC6Wri5nbaMmkGmLQBk-Yx3z0XDEtI/edit#gid=0
 
->To help ourselves understnd the variables and the relationship between them and answer relevant questions, and since we have 81 variables, we'll select the key ones by subseting df.
+>To help ourselves understand the variables and the relationship between them and answer relevant questions, and since we have 81 variables, we'll select the key ones by subseting df.
 > We'll choose  
 >LoanOriginalAmount
 >BorrowerRate
@@ -21,6 +23,63 @@ df=read.csv('prosperLoanData.csv')
 >BorrowerState
 >ListingCategory
 >EmploymentStatus
+>Occupation
 >CurrentCreditLines
 >ListingKey
 >LoanKey
+>OnTimeProsperPayments
+
+##Subsetting the data
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(dplyr)
+df_s <- df %>%
+  select(LoanOriginalAmount, BorrowerRate, LoanStatus, IncomeRange, BorrowerState,Occupation,ListingCategory..numeric., OnTimeProsperPayments , EmploymentStatus, CurrentCreditLines, ListingKey, LoanKey)
+```
+#Univariate Plots Section
+##First to get realy started in our data and get deep understanding of it, we'll produce summaries and visualizations of each individual variable
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+dim(df)
+```
+> Our Dataset consists of 81 variables with almost 113937 observations, we reduced the number of variable to 12.
+
+```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
+require(ggplot2)
+ggplot(data=df_s, aes(x=LoanOriginalAmount)) +
+  geom_histogram(binwidth=500, color= I('black'), fill=I('#099DD9')) +
+  scale_x_continuous(breaks=seq(1000,30000,1000), limits=c(1000,30000))
+```
+>We notice the presence of 3 peaks: about 15000 borrowrs borrow an amount of 4000 dollars, 10000 dollars is  >borrowed by about 12000 of Prosper customers and 12500 of customers and finally the third peak indicates that >12500 of customers have an original amount loan of 15000 dollars, maybe the three peaks are explained by the >difference in monthly incomes and needs.
+
+```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
+library(ggplot2)
+ggplot(data=df_s, aes(x=OnTimeProsperPayments)) +
+  geom_histogram( color= I('black'), fill=I('#099DD9'))+
+  scale_x_continuous(breaks=seq(0,100,5), limits=c(0,100))
+```
+>We notice that more than 5000 of borrowers pay ontime just 10 times.
+
+```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
+ggplot(data=df_s, aes(x=CurrentCreditLines)) +
+  geom_histogram( color= I('black'), fill=I('#099DD9')) +
+  scale_x_continuous(breaks=seq(0,40,2), limits=c(0,40))+
+  scale_y_continuous(breaks=seq(0,20000,1000), limits=c(0,20000))
+```
+> More than 16000 of borrowers have 10 credit lines at the time the credit profile was pulled.
+
+
+```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
+require(ggplot2)
+ggplot(data=df_s, aes(x=LoanOriginalAmount)) +
+  geom_histogram(binwidth=500, color= I('black'), fill=I('#099DD9')) +
+  scale_x_continuous(breaks=seq(1000,30000,1000), limits=c(1000,30000))+
+  facet_wrap(~BorrowerState)
+```
+Most of borrowers are from big cities where the standard of living is somewhat expensive: California NewYork Texas...
+```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
+require(ggplot2)
+ggplot(data=df_s, aes(x=LoanOriginalAmount)) +
+  geom_histogram(binwidth=500, color= I('black'), fill=I('#099DD9')) +
+  #scale_x_continuous(breaks=seq(1000,30000,1000), limits=c(1000,30000))+
+  facet_wrap(~BorrowerRate)
+```
+q()
