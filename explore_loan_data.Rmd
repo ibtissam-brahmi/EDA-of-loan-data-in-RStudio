@@ -101,6 +101,7 @@ str(df_s$IncomeRange)
 ```
 We arrange our data set by IncomeRange
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
+library(dplyr)
 df_s <- df_s %>%
  arrange(IncomeRange)
 ```
@@ -118,6 +119,7 @@ ggplot(data=subset(df_s, !is.na(IncomeRange)), aes(y=LoanOriginalAmount, x=Occup
   geom_boxplot()
 ```
 It's interesting to see whats high loan original amount boorowers occupation, but we have so much levels that we cant't visualize in a clean manner.
+
 
 #Bivariate Analysis
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
@@ -160,8 +162,8 @@ require(ggplot2)
 ggplot(data=subset(df, !is.na(IncomeRange)), aes(x=Term, y=BorrowerRate)) +
   geom_point( size=0.5, position='jitter')
 ```
-table(df_s$Term)
-Borrowoers who choose 36 months as a lenght of the loan (middle term) have the highest Borrower Rate
+
+Borrowers who choose 36 months as a lenght of the loan (middle term) have the highest Borrower Rate
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
 require(ggplot2)
@@ -315,6 +317,7 @@ ggpairs(df_b_gg[sample.int(nrow(df_b_gg),1000),])
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
 cor.test(df_by_income$CurrentCreditLines,df_by_income$mean_rate)
 ```
+
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
 cor.test(df_by_income$mean_rate,df_by_income$mean_loan)
 ```
@@ -328,6 +331,61 @@ ggplot(data=subset(df_by_income, !is.na(IncomeRange)), aes(x=mean_loan, y=mean_r
  scale_color_brewer(type='div')
 ```
 
-We notice a negative correlation between mean rate and mean loan especially for debt consolidation and home improvement, as the mean loan amount increases, the rate decreased, we could be interested in calculating by how much of dollars approximately the loan increases
-To do that we'll create a new variable, called 
+We notice a negative correlation between mean rate and mean loan especially for debt consolidation and home improvement, as the mean loan amount increases, the rate decreased, we could be interested in calculating by how much of dollars the loan increases.
+>To do that we'll create a new variable, called increase:
 
+```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
+df_s$increase <- df_s$LoanOriginalAmount-(df$LoanOriginalAmount*df$BorrowerRate)
+```
+
+```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
+df_by_income <- df_s%>%
+  group_by(IncomeRange, LoanStatus, CurrentCreditLines, ListingCategory)%>%
+  summarise(mean_loan=mean(LoanOriginalAmount), median_loan=median(LoanOriginalAmount), mean_payments=mean(OnTimeProsperPayments),median_payments=median(OnTimeProsperPayments), mean_rate=mean(BorrowerRate), mean_increase=mean(increase))
+```
+
+
+```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
+cor.test(df_s$BorrowerRate,df_s$increase)
+```
+
+#Final Plots
+
+```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
+require(ggplot2)
+ggplot(data=df_s, aes(x=LoanOriginalAmount)) +
+  geom_histogram( binwidth=500, color= I('black'), fill=I('#099DD9')) +
+  xlab("loan original amount")+
+  ggtitle("Distribution of loan original amounts")
+  scale_x_continuous(breaks=seq(1000,28000,2000), limits=c(1000,30000))
+```
+
+Principally, there is 3 loan amounts that are more frequent: 4000, 10000 and 15000 dollars.
+
+```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
+require(ggplot2)
+ggplot(data=subset(df_s, !is.na(CurrentCreditLines)), aes(x=CurrentCreditLines, y=OnTimeProsperPayments)) +
+  geom_jitter(alpha=0.7, size=1)+
+xlab("current credit lines")+
+  ylab("On time prosper payments")+
+  ggtitle("Current credit lines Vs. On time prosper payments")
+```
+
+Expecting that it will be a negative correlation between current credit lines and on time prosper payments, it turns to be 0.06! the distribution seems to be somewhat normal and we also notice the presence of some outliers; for example, someone has about 60 dredit lines at a time, but not even 50 on time payments!
+
+```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
+require(ggplot2)
+ggplot(data=subset(df_by_income, !is.na(IncomeRange)), aes(x=CurrentCreditLines, y=mean_loan, color=IncomeRange))+  geom_point(alpha=0.7, size=1.5, position='jitter')+
+  scale_y_log10()+
+ scale_color_brewer(type='div')
+```
+
+```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
+cor.test(df_by_income$CurrentCreditLines,df_by_income$mean_loan)
+```
+
+Before scaling y axis to log10, the data seemed to be spreaded, now it looks there exists an exponential relation between current credit lines and mean original amount loan by income range, this is confirmed by the correlation coefficient: 0.287
+
+#Reflections
+I wanted to challenge myself by choosing a so complex dataset, the first difficulty I encountred is the high number of features, I just read the variables description, and choose mentally most relevant ones, maybe by taking a course in feature selection I'll do better.
+I think that I success in interpreting some key plots, discovering main trends and digest large amount of information.
