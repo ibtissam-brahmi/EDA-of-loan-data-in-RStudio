@@ -10,6 +10,7 @@ editor_options:
 ---
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
+#Load the data
 df=read.csv('prosperLoanData.csv')
 ```
 > We can see the variables descriptions of the data at the link
@@ -33,6 +34,7 @@ df=read.csv('prosperLoanData.csv')
 
 ##Subsetting the data
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
+#Select more relevant variables from the whole dataset (df) and store them in df_s
 library(dplyr)
 df_s <- df %>%
   select(LoanOriginalAmount, BorrowerRate, LoanStatus, IncomeRange, BorrowerState,Occupation,ListingCategory..numeric., Term, OnTimeProsperPayments , EmploymentStatus, CurrentCreditLines, ListingKey, LoanKey,Term)
@@ -40,32 +42,36 @@ df_s <- df %>%
 #Univariate Analysis
 ##First to get realy started with our data and get deep understanding of it, we'll produce summaries and visualizations of each individual variable
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
+#get the dimension of our whole dataset
 dim(df)
 ```
 > Our Dataset consists of 81 variables with almost 113937 observations, we reduced the number of variable to 13.
 
+
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
- require(ggplot2)
+#Plot the distribution of loan original amount 
+require(ggplot2)
 ggplot(data=df_s, aes(x=LoanOriginalAmount)) +
   geom_histogram(binwidth=500, color= I('black'), fill=I('#099DD9')) +
   scale_x_continuous(breaks=seq(1000,30000,1000), limits=c(1000,30000))
 ```
 
-
-We notice the presence of 3 peaks: about 15000 borrowrs borrow an amount of 4000 dollars, 10000 dollars is  borrowed by about 12000 of Prosper customers, and finally the third peak indicates that 12500 of customers have an original amount loan of 15000 dollars, maybe the three peaks are explained by the difference in monthly incomes and needs.
+We notice the presence of 3 peaks: about 15000 borrowers borrow an amount of 4000 dollars, 10000 dollars is  borrowed by about 12000 of Prosper customers, and finally the third peak indicates that 12500 of customers have an original amount loan of 15000 dollars, maybe the three peaks are explained by the difference in monthly incomes and needs.
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
+#Plot the distribution of on time prosper payments
 ggplot(data=df_s, aes(x=OnTimeProsperPayments)) +
   geom_histogram( color= I('black'), fill=I('#099DD9'))+
   scale_x_continuous(breaks=seq(0,100,5), limits=c(0,100))
 ```
 
-We notice that more than 5000 of borrowers pay ontime just 10 times.
-The distribution is left skwed with a long tail.
+We notice that more than 5000 of borrowers pay on time just 10 times.
+The distribution is left skewed with a long tail.
 
 
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
+#Distribution of current credit lines
 ggplot(data=df_s, aes(x=CurrentCreditLines)) +
   geom_histogram( color= I('black'), fill=I('#099DD9')) +
   scale_x_continuous(breaks=seq(0,40,2), limits=c(0,40))+
@@ -76,24 +82,25 @@ ggplot(data=df_s, aes(x=CurrentCreditLines)) +
 
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
- 
+#Plot the distribution of loan original amounts of each state separately
 ggplot(data=df_s, aes(x=LoanOriginalAmount)) +
   geom_histogram(binwidth=500, color= I('black'), fill=I('#099DD9')) +
   scale_x_continuous(breaks=seq(1000,30000,1000), limits=c(1000,30000))+
   facet_wrap(~BorrowerState)
 ```
 
-Most of borrowers are from big cities where the standard of living is somewhat expensive: California NewYork Texas Florida...
+Most of borrowers are from big cities where the standard of living is somewhat expensive: California New York Texas Florida...
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
+#Transform Listing category to a factor variable to facet with
 df_s$ListingCategory <- factor(df_s$ListingCategory)
 str(df_s$ListingCategory)
 ```
 
- We transformed ListingCategory to a factor variablesuch that we can facet with it
+ We transformed ListingCategory to a factor variable such that we can facet with it
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
- 
+#Plot the distribution of loan original amount for each listing category 
 ggplot(data=df_s, aes(x=LoanOriginalAmount)) +
   geom_histogram(binwidth=500, color= I('black'), fill=I('#099DD9')) +
     facet_wrap(~ListingCategory)
@@ -101,20 +108,21 @@ ggplot(data=df_s, aes(x=LoanOriginalAmount)) +
 
 Most of demanded loans are about debt consolidation  
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
- 
+#get the structure of income range variable
 str(df_s$IncomeRange)
 ```
 
-We arrange our data set by IncomeRange
+We arrange our data set by Income Range
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
+#arrange by income range to have a well presented plot
 library(dplyr)
 df_s <- df_s %>%
  arrange(IncomeRange)
 ```
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
- 
+ #plot the box plot of income range Vs loan original amount
 ggplot(data=subset(df_s, !is.na(IncomeRange)), aes(y=LoanOriginalAmount, x=IncomeRange)) +
   geom_boxplot()
 ```
@@ -122,71 +130,73 @@ ggplot(data=subset(df_s, !is.na(IncomeRange)), aes(y=LoanOriginalAmount, x=Incom
 We notice the presence of outliers, especially for 1$-24,900$ class, borrowers with high incomes have the greatest IQR and median.
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
- 
+ #plot the box plot of occupation Vs loan original amount
 ggplot(data=subset(df_s, !is.na(IncomeRange)), aes(y=LoanOriginalAmount, x=Occupation)) +
   geom_boxplot()
 ```
 
-It's interesting to see whats high loan original amount boorowers occupation, but we have so much levels that we cant't visualize in a clean manner.
+It's interesting to see whats high loan original amount borrowers occupation, but we have so much levels that we can't visualize in a clean manner.
 
 
 #Bivariate Analysis
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
- 
+ #plot the scatter plot of loan original amount and borrower rate
 ggplot(data=subset(df_s, !is.na(IncomeRange)), aes(x=LoanOriginalAmount, y=BorrowerRate)) +
   geom_point(alpha=0.7, position='jitter')
 ```
 
 The log scale will be more informative since we have a multiplicative relationship between x and y
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
- 
+ #reproduce the same preceding plot with a log scale of x-axis
 ggplot(data=subset(df_s, !is.na(IncomeRange)), aes(x=LoanOriginalAmount, y=BorrowerRate)) +
   geom_point(alpha=0.5, size=0.5, position='jitter')+
   scale_x_log10()
 ```
 
-Besides overplotting, we see that for the same loan original amount we have a lot of degrees of borrower rates?!
+Besides over plotting, we see that for the same loan original amount we have a lot of degrees of borrower rates?!
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
- 
+ #A plot showing the correlation between the current credit lines and on time prosper payments
 ggplot(data=subset(df_s, !is.na(CurrentCreditLines)), aes(x=CurrentCreditLines, y=OnTimeProsperPayments)) +
   geom_point(alpha=0.5, size=0.5, position='jitter')
 ```
+
+
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
- 
+ #calculate the Pearson correlation between current credit lines and on time prosper payments
 cor.test(df_s$CurrentCreditLines,df_s$OnTimeProsperPayments)
 ```
 
-Expecting that it will be a negative correlation between current credit lines and on time prosper payments, it turns to be 0.06! the distribution seems to be somewhat normal and we also notice the presence of some outliers; for example, someone has about 60 dredit lines at a time, but not even 50 on time payments!
+Expecting that it will be a negative correlation between current credit lines and on time prosper payments, it turns to be 0.06! the distribution seems to be somewhat normal and we also notice the presence of some outliers; for example, someone has about 60 credit lines at a time, but not even 50 on time payments!
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
- 
+ #plot the correlation between listing category and on time prosper payments
 ggplot(data=subset(df, !is.na(IncomeRange)), aes(x=ListingCategory..numeric., y=OnTimeProsperPayments)) +
   geom_point()+
   scale_x_continuous(breaks=seq(0,20,1))+
   scale_y_continuous(breaks=seq(0,150,10))
 ```
 
-Most of on time prosper payements concern debt consolidation and home improvement, comes in second range Household Expenses and Large Purchases.
+Most of on time prosper payments concern debt consolidation and home improvement, comes in second range Household Expenses and Large Purchases.
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
- 
+ #Scatter plot between Term (in months) and borrower rate
 ggplot(data=subset(df, !is.na(IncomeRange)), aes(x=Term, y=BorrowerRate)) +
   geom_point( size=0.5, position='jitter')
 ```
 
-Borrowers who choose 36 months as a lenght of the loan (middle term) have the highest Borrower Rate
+Borrowers who choose 36 months as a length of the loan (middle term) have the highest Borrower Rate
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
- 
+ #Scatter plot between Term (in months) and on time prosper payments
 ggplot(data=subset(df, !is.na(IncomeRange)), aes(x=Term, y=OnTimeProsperPayments)) +
   geom_point( size=0.5, position='jitter')
 ```
 
-On time Prosper payments is frequent for borrowores who choosed the middle term, maybe we can ask who what is the Income range of those borrowers!
+On time Prosper payments is frequent for borrowers who choose the middle term, maybe we can ask who what is the Income range of those borrowers!
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
- 
+  #Scatter plot between income range and on time prosper payments for avery Term (in months) 
 ggplot(data=subset(df, !is.na(IncomeRange)), aes(x=IncomeRange, y=OnTimeProsperPayments)) +
   geom_point( size=0.5, position='jitter')+
   facet_wrap(~Term,ncol=1)
@@ -194,17 +204,15 @@ ggplot(data=subset(df, !is.na(IncomeRange)), aes(x=IncomeRange, y=OnTimeProsperP
 
 Borrowers with in income range of 25000 and 74999 dollars and divided their loan on 36 months are more prone to pay on time.
 
-Now we'll be interested to the mean of original amount loan by income range, before, we should order IncomeRange factor variable
+Now we'll be interested to the mean of original amount loan by income range, before, we should order Income Range factor variable
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
- 
+ #arrange the factors variable income range from lowest to highest
 df_s$IncomeRange<-ordered(df$IncomeRange, level=c('$0', '$1-24,999', '$25,000-49,999', '$50,000-74,999', '$75,000-99,999', '$100,000+' , 'Not displayed', 'Not employed'))
 ```
 
-
-
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
- 
+ #plot the income range Vs the mean loan original amount
 ggplot(subset(df, !is.na(IncomeRange)), aes(IncomeRange, LoanOriginalAmount, group=1))+
   geom_line(stat='summary', fun.y=mean)
 ```
@@ -212,6 +220,7 @@ ggplot(subset(df, !is.na(IncomeRange)), aes(IncomeRange, LoanOriginalAmount, gro
 Except the income range between 0$ and 24,999$, as we climb in income ranges the loan original amount increases.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
+#create a reduced dataset containing less variables to plot a scatter plot matrix
 library(dplyr)
 df_s_gg <- df %>%
   select(LoanOriginalAmount, BorrowerRate, LoanStatus, IncomeRange,ListingCategory..numeric., Term, OnTimeProsperPayments , EmploymentStatus, CurrentCreditLines)
@@ -219,70 +228,73 @@ df_s_gg <- df %>%
 
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
- 
+ #plot a scatter plot matrix
 library(GGally)
 set.seed(1598)
 theme_set(theme_minimal(20))
 ggpairs(df_s_gg[sample.int(nrow(df_s_gg),1000),])
 ```
 
-We just discover an interesting relationship between Borrower Rate and Current Credit Line, let's plot the scatterplot separately
+We just discover an interesting relationship between Borrower Rate and Current Credit Line, let's plot the scatter plot separately
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
- 
+ #plot current credit lines Vs borrower rate
 ggplot(data=subset(df, !is.na(IncomeRange)), aes(y=BorrowerRate, x=CurrentCreditLines)) +
   geom_point( size=0.5, position='jitter')+
   scale_x_log10(breaks=seq(0,100,5))
 ```
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
-cor.test(df_s$BorrowerRate,df_s$CurrentCreditLines, method='kendall')
+#calculate pearson correlation between current credit lines and borrower rate
+cor.test(df_s$BorrowerRate,df_s$CurrentCreditLines)
 ```
 ?cor.test
 
 #Multivariate 
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
- 
+ #plot the Term of loan Vs loan original amount for each income range category in one plot
 ggplot(data=subset(df, !is.na(IncomeRange)), aes(x=Term, y=LoanOriginalAmount,color=IncomeRange)) +
   geom_line(stat='summary',fun.y=mean)+
   scale_color_brewer(type='div')
 ```
 
-It coud be strange that not employed borrowers loan, in average more than borrowrs that earn more (0-24,999$ income range)
-Borrowers whose income is more than 100,000 dollars turn to have the greates loan original amount, it seems interesting to discover, why do they borrow this money, in other words, in what Listing category they are interested in.
+It could be strange that not employed borrowers loan, in average more than borrows that earn more (0-24,999$ income range)
+Borrowers whose income is more than 100,000 dollars turn to have the greatest loan original amount, it seems interesting to discover, why do they borrow this money, in other words, in what Listing category they are interested in.
 We start by converting ,ListingCategory..numeric. to a categorical variable
 
 df_s$ListingCategory..numeric. <- factor(df_s$ListingCategory..numeric.)
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
- 
-ggplot(data=subset(df, !is.na(IncomeRange)), aes(x=(BorrowerRate), y=LoanOriginalAmount/Term, group=1, color=IncomeRange)) +
+ #plot the borrower rate Vs loan original amount for each income range category in one plot
+ggplot(data=subset(df, !is.na(IncomeRange)), aes(x=BorrowerRate, y=LoanOriginalAmount/Term, group=1, color=IncomeRange)) +
   geom_point()+
  scale_color_brewer(type='seq')
 ```
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
+#create a summarising data set grouped by main categorical variables and highliting mean numerical variables
 df_by_income <- df_s%>%
   group_by(IncomeRange, LoanStatus, CurrentCreditLines, ListingCategory)%>%
   summarise(mean_loan=mean(LoanOriginalAmount), median_loan=median(LoanOriginalAmount), mean_payments=mean(OnTimeProsperPayments),median_payments=median(OnTimeProsperPayments), mean_rate=mean(BorrowerRate))
 ```
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
- 
+ #plot the current credit lines Vs mean of original amount loan for each income range
 ggplot(data=subset(df_by_income, !is.na(IncomeRange)), aes(x=CurrentCreditLines, y=mean_loan, color=IncomeRange))+  geom_point(alpha=0.7, size=1.5, position='jitter')+
   scale_y_log10()+
  scale_color_brewer(type='div')
 ```
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
+#calculate the pearson correlation between current credit lines and mean of original amount loan
 cor.test(df_by_income$CurrentCreditLines,df_by_income$mean_loan)
 ```
 
-Before scaling y axis to log10, the data seemed to be spreaded, now it looks there exists an exponential relation between current credit lines and mean original amount loan by income range, this is confirmed by the correlation coefficient: 0.287
+Before scaling y axis to log10, the data seemed to be spread, now it looks there exists an exponential relation between current credit lines and mean original amount loan by income range, this is confirmed by the correlation coefficient: 0.287
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
- 
+  #plot the current credit lines Vs mean of original amount loan for each income range
 ggplot(data=subset(df_by_income, !is.na(IncomeRange)), aes(x=CurrentCreditLines, y=median_loan, color=IncomeRange))+  geom_point(alpha=0.7, size=1.5, position='jitter')+
   scale_y_log10()+
  scale_color_brewer(type='div')
@@ -388,7 +400,7 @@ xlab("current credit lines")+
   ggtitle("Current credit lines Vs. On time prosper payments")
 ```
 
-Expecting that it will be a negative correlation between current credit lines and on time prosper payments, it turns to be 0.06! the distribution seems to be somewhat normal and we also notice the presence of some outliers; for example, someone has about 60 dredit lines at a time, but not even 50 on time payments!
+Expecting that it will be a negative correlation between current credit lines and on time prosper payments, it turns to be 0.06! the distribution seems to be somewhat normal and we also notice the presence of some outliers; for example, someone has about 60 credit lines at a time, but not even 50 on time payments!
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
  
@@ -401,8 +413,8 @@ ggplot(data=subset(df_by_income, !is.na(IncomeRange)), aes(x=CurrentCreditLines,
 cor.test(df_by_income$CurrentCreditLines,df_by_income$mean_loan)
 ```
 
-Before scaling y axis to log10, the data seemed to be spreaded, now it looks there exists an exponential relation between current credit lines and mean original amount loan by income range, this is confirmed by the correlation coefficient: 0.287
+Before scaling y axis to log10, the data seemed to be spread, now it looks there exists an exponential relation between current credit lines and mean original amount loan by income range, this is confirmed by the correlation coefficient: 0.287
 
 #Reflections
-I wanted to challenge myself by choosing a so complex dataset, the first difficulty I encountred is the high number of features, I just read the variables description, and choose mentally most relevant ones, maybe by taking a course in feature selection I'll do better.
+I wanted to challenge myself by choosing a so complex data set, the first difficulty I encountered is the high number of features, I just read the variables description, and choose mentally most relevant ones, maybe by taking a course in feature selection I'll do better.
 I think that I success in interpreting some key plots, discovering main trends and digest large amount of information.
