@@ -10,7 +10,6 @@ editor_options:
 ---
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-getwd()
 df=read.csv('prosperLoanData.csv')
 ```
 > We can see the variables descriptions of the data at the link
@@ -29,13 +28,14 @@ df=read.csv('prosperLoanData.csv')
 >CurrentCreditLines
 >ListingKey
 >LoanKey
+>Term
 >OnTimeProsperPayments.
 
 ##Subsetting the data
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 library(dplyr)
 df_s <- df %>%
-  select(LoanOriginalAmount, BorrowerRate, LoanStatus, IncomeRange, BorrowerState,Occupation,ListingCategory..numeric., Term, OnTimeProsperPayments , EmploymentStatus, CurrentCreditLines, ListingKey, LoanKey)
+  select(LoanOriginalAmount, BorrowerRate, LoanStatus, IncomeRange, BorrowerState,Occupation,ListingCategory..numeric., Term, OnTimeProsperPayments , EmploymentStatus, CurrentCreditLines, ListingKey, LoanKey,Term)
 ```
 #Univariate Analysis
 ##First to get realy started with our data and get deep understanding of it, we'll produce summaries and visualizations of each individual variable
@@ -45,19 +45,21 @@ dim(df)
 > Our Dataset consists of 81 variables with almost 113937 observations, we reduced the number of variable to 13.
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
-require(ggplot2)
+ require(ggplot2)
 ggplot(data=df_s, aes(x=LoanOriginalAmount)) +
   geom_histogram(binwidth=500, color= I('black'), fill=I('#099DD9')) +
   scale_x_continuous(breaks=seq(1000,30000,1000), limits=c(1000,30000))
 ```
+
+
 We notice the presence of 3 peaks: about 15000 borrowrs borrow an amount of 4000 dollars, 10000 dollars is  borrowed by about 12000 of Prosper customers, and finally the third peak indicates that 12500 of customers have an original amount loan of 15000 dollars, maybe the three peaks are explained by the difference in monthly incomes and needs.
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
-library(ggplot2)
 ggplot(data=df_s, aes(x=OnTimeProsperPayments)) +
   geom_histogram( color= I('black'), fill=I('#099DD9'))+
   scale_x_continuous(breaks=seq(0,100,5), limits=c(0,100))
 ```
+
 We notice that more than 5000 of borrowers pay ontime just 10 times.
 The distribution is left skwed with a long tail.
 
@@ -69,16 +71,18 @@ ggplot(data=df_s, aes(x=CurrentCreditLines)) +
   scale_x_continuous(breaks=seq(0,40,2), limits=c(0,40))+
   scale_y_continuous(breaks=seq(0,20000,1000), limits=c(0,20000))
 ```
-> More than 16000 of borrowers have 10 credit lines at the time the credit profile was pulled.
+
+ More than 16000 of borrowers have 10 credit lines at the time the credit profile was pulled.
 
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
-require(ggplot2)
+ 
 ggplot(data=df_s, aes(x=LoanOriginalAmount)) +
   geom_histogram(binwidth=500, color= I('black'), fill=I('#099DD9')) +
   scale_x_continuous(breaks=seq(1000,30000,1000), limits=c(1000,30000))+
   facet_wrap(~BorrowerState)
 ```
+
 Most of borrowers are from big cities where the standard of living is somewhat expensive: California NewYork Texas Florida...
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
@@ -89,17 +93,20 @@ str(df_s$ListingCategory)
  We transformed ListingCategory to a factor variablesuch that we can facet with it
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
-require(ggplot2)
+ 
 ggplot(data=df_s, aes(x=LoanOriginalAmount)) +
   geom_histogram(binwidth=500, color= I('black'), fill=I('#099DD9')) +
     facet_wrap(~ListingCategory)
 ```
+
 Most of demanded loans are about debt consolidation  
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
-require(ggplot2)
+ 
 str(df_s$IncomeRange)
 ```
+
 We arrange our data set by IncomeRange
+
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
 library(dplyr)
 df_s <- df_s %>%
@@ -107,58 +114,63 @@ df_s <- df_s %>%
 ```
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
-require(ggplot2)
+ 
 ggplot(data=subset(df_s, !is.na(IncomeRange)), aes(y=LoanOriginalAmount, x=IncomeRange)) +
   geom_boxplot()
 ```
+
 We notice the presence of outliers, especially for 1$-24,900$ class, borrowers with high incomes have the greatest IQR and median.
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
-require(ggplot2)
+ 
 ggplot(data=subset(df_s, !is.na(IncomeRange)), aes(y=LoanOriginalAmount, x=Occupation)) +
   geom_boxplot()
 ```
+
 It's interesting to see whats high loan original amount boorowers occupation, but we have so much levels that we cant't visualize in a clean manner.
 
 
 #Bivariate Analysis
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
-require(ggplot2)
+ 
 ggplot(data=subset(df_s, !is.na(IncomeRange)), aes(x=LoanOriginalAmount, y=BorrowerRate)) +
   geom_point(alpha=0.7, position='jitter')
 ```
+
 The log scale will be more informative since we have a multiplicative relationship between x and y
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
-require(ggplot2)
+ 
 ggplot(data=subset(df_s, !is.na(IncomeRange)), aes(x=LoanOriginalAmount, y=BorrowerRate)) +
   geom_point(alpha=0.5, size=0.5, position='jitter')+
   scale_x_log10()
 ```
+
 Besides overplotting, we see that for the same loan original amount we have a lot of degrees of borrower rates?!
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
-require(ggplot2)
+ 
 ggplot(data=subset(df_s, !is.na(CurrentCreditLines)), aes(x=CurrentCreditLines, y=OnTimeProsperPayments)) +
   geom_point(alpha=0.5, size=0.5, position='jitter')
 ```
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
-require(ggplot2)
+ 
 cor.test(df_s$CurrentCreditLines,df_s$OnTimeProsperPayments)
 ```
 
 Expecting that it will be a negative correlation between current credit lines and on time prosper payments, it turns to be 0.06! the distribution seems to be somewhat normal and we also notice the presence of some outliers; for example, someone has about 60 dredit lines at a time, but not even 50 on time payments!
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
-require(ggplot2)
+ 
 ggplot(data=subset(df, !is.na(IncomeRange)), aes(x=ListingCategory..numeric., y=OnTimeProsperPayments)) +
   geom_point()+
   scale_x_continuous(breaks=seq(0,20,1))+
   scale_y_continuous(breaks=seq(0,150,10))
 ```
+
 Most of on time prosper payements concern debt consolidation and home improvement, comes in second range Household Expenses and Large Purchases.
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
-require(ggplot2)
+ 
 ggplot(data=subset(df, !is.na(IncomeRange)), aes(x=Term, y=BorrowerRate)) +
   geom_point( size=0.5, position='jitter')
 ```
@@ -166,31 +178,33 @@ ggplot(data=subset(df, !is.na(IncomeRange)), aes(x=Term, y=BorrowerRate)) +
 Borrowers who choose 36 months as a lenght of the loan (middle term) have the highest Borrower Rate
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
-require(ggplot2)
+ 
 ggplot(data=subset(df, !is.na(IncomeRange)), aes(x=Term, y=OnTimeProsperPayments)) +
   geom_point( size=0.5, position='jitter')
 ```
+
 On time Prosper payments is frequent for borrowores who choosed the middle term, maybe we can ask who what is the Income range of those borrowers!
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
-require(ggplot2)
+ 
 ggplot(data=subset(df, !is.na(IncomeRange)), aes(x=IncomeRange, y=OnTimeProsperPayments)) +
   geom_point( size=0.5, position='jitter')+
   facet_wrap(~Term,ncol=1)
 ```
+
 Borrowers with in income range of 25000 and 74999 dollars and divided their loan on 36 months are more prone to pay on time.
 
 Now we'll be interested to the mean of original amount loan by income range, before, we should order IncomeRange factor variable
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
-require(ggplot2)
+ 
 df_s$IncomeRange<-ordered(df$IncomeRange, level=c('$0', '$1-24,999', '$25,000-49,999', '$50,000-74,999', '$75,000-99,999', '$100,000+' , 'Not displayed', 'Not employed'))
 ```
 
-table(df_s$Occupation)
+
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
-require(ggplot2)
+ 
 ggplot(subset(df, !is.na(IncomeRange)), aes(IncomeRange, LoanOriginalAmount, group=1))+
   geom_line(stat='summary', fun.y=mean)
 ```
@@ -205,16 +219,17 @@ df_s_gg <- df %>%
 
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
-require(ggplot2)
+ 
 library(GGally)
 set.seed(1598)
 theme_set(theme_minimal(20))
 ggpairs(df_s_gg[sample.int(nrow(df_s_gg),1000),])
 ```
+
 We just discover an interesting relationship between Borrower Rate and Current Credit Line, let's plot the scatterplot separately
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
-require(ggplot2)
+ 
 ggplot(data=subset(df, !is.na(IncomeRange)), aes(y=BorrowerRate, x=CurrentCreditLines)) +
   geom_point( size=0.5, position='jitter')+
   scale_x_log10(breaks=seq(0,100,5))
@@ -228,11 +243,12 @@ cor.test(df_s$BorrowerRate,df_s$CurrentCreditLines, method='kendall')
 #Multivariate 
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
-require(ggplot2)
+ 
 ggplot(data=subset(df, !is.na(IncomeRange)), aes(x=Term, y=LoanOriginalAmount,color=IncomeRange)) +
   geom_line(stat='summary',fun.y=mean)+
   scale_color_brewer(type='div')
 ```
+
 It coud be strange that not employed borrowers loan, in average more than borrowrs that earn more (0-24,999$ income range)
 Borrowers whose income is more than 100,000 dollars turn to have the greates loan original amount, it seems interesting to discover, why do they borrow this money, in other words, in what Listing category they are interested in.
 We start by converting ,ListingCategory..numeric. to a categorical variable
@@ -240,7 +256,7 @@ We start by converting ,ListingCategory..numeric. to a categorical variable
 df_s$ListingCategory..numeric. <- factor(df_s$ListingCategory..numeric.)
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
-require(ggplot2)
+ 
 ggplot(data=subset(df, !is.na(IncomeRange)), aes(x=(BorrowerRate), y=LoanOriginalAmount/Term, group=1, color=IncomeRange)) +
   geom_point()+
  scale_color_brewer(type='seq')
@@ -253,7 +269,7 @@ df_by_income <- df_s%>%
 ```
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
-require(ggplot2)
+ 
 ggplot(data=subset(df_by_income, !is.na(IncomeRange)), aes(x=CurrentCreditLines, y=mean_loan, color=IncomeRange))+  geom_point(alpha=0.7, size=1.5, position='jitter')+
   scale_y_log10()+
  scale_color_brewer(type='div')
@@ -266,7 +282,7 @@ cor.test(df_by_income$CurrentCreditLines,df_by_income$mean_loan)
 Before scaling y axis to log10, the data seemed to be spreaded, now it looks there exists an exponential relation between current credit lines and mean original amount loan by income range, this is confirmed by the correlation coefficient: 0.287
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
-require(ggplot2)
+ 
 ggplot(data=subset(df_by_income, !is.na(IncomeRange)), aes(x=CurrentCreditLines, y=median_loan, color=IncomeRange))+  geom_point(alpha=0.7, size=1.5, position='jitter')+
   scale_y_log10()+
  scale_color_brewer(type='div')
@@ -275,10 +291,11 @@ ggplot(data=subset(df_by_income, !is.na(IncomeRange)), aes(x=CurrentCreditLines,
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
 cor.test(df_by_income$CurrentCreditLines,df_by_income$median_loan)
 ```
->The relation between current credit lines and median loan seems to stronger than the relation that relates it with mean loan since the coefficient is 0.318
+
+The relation between current credit lines and median loan seems to stronger than the relation that relates it with mean loan since the coefficient is 0.318
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
-require(ggplot2)
+ 
 ggplot(data=subset(df_by_income, !is.na(IncomeRange)), aes(x=CurrentCreditLines, y=median_loan, color=LoanStatus))+  geom_point(alpha=0.7, size=1.5, position='jitter')+
   scale_x_log10()+
   facet_wrap(~ListingCategory)+
@@ -287,7 +304,7 @@ ggplot(data=subset(df_by_income, !is.na(IncomeRange)), aes(x=CurrentCreditLines,
 ```
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
-require(ggplot2)
+ 
 ggplot(data=subset(df_by_income, !is.na(IncomeRange)), aes(x=20*round(mean_payments/20), y=mean_loan))+  geom_line()+
   scale_x_continuous(breaks=seq(0,100,5))+
  scale_color_brewer(type='div')
@@ -307,7 +324,7 @@ df_b_gg <- df_by_income %>%
 
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
-require(ggplot2)
+ 
 library(GGally)
 set.seed(1598)
 theme_set(theme_minimal(20))
@@ -325,7 +342,7 @@ cor.test(df_by_income$mean_rate,df_by_income$mean_loan)
 
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
-require(ggplot2)
+ 
 ggplot(data=subset(df_by_income, !is.na(IncomeRange)), aes(x=mean_loan, y=mean_rate, color=ListingCategory))+  geom_point(alpha=0.5, size=0.5)+
   scale_x_log10()+
  scale_color_brewer(type='div')
@@ -352,7 +369,7 @@ cor.test(df_s$BorrowerRate,df_s$increase)
 #Final Plots
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
-require(ggplot2)
+ 
 ggplot(data=df_s, aes(x=LoanOriginalAmount)) +
   geom_histogram( binwidth=500, color= I('black'), fill=I('#099DD9')) +
   xlab("loan original amount")+
@@ -363,7 +380,7 @@ ggplot(data=df_s, aes(x=LoanOriginalAmount)) +
 Principally, there is 3 loan amounts that are more frequent: 4000, 10000 and 15000 dollars.
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
-require(ggplot2)
+ 
 ggplot(data=subset(df_s, !is.na(CurrentCreditLines)), aes(x=CurrentCreditLines, y=OnTimeProsperPayments)) +
   geom_jitter(alpha=0.7, size=1)+
 xlab("current credit lines")+
@@ -374,7 +391,7 @@ xlab("current credit lines")+
 Expecting that it will be a negative correlation between current credit lines and on time prosper payments, it turns to be 0.06! the distribution seems to be somewhat normal and we also notice the presence of some outliers; for example, someone has about 60 dredit lines at a time, but not even 50 on time payments!
 
 ```{r,echo=FALSE, results='asis', message = FALSE, error = FALSE, warning= FALSE}
-require(ggplot2)
+ 
 ggplot(data=subset(df_by_income, !is.na(IncomeRange)), aes(x=CurrentCreditLines, y=mean_loan, color=IncomeRange))+  geom_point(alpha=0.7, size=1.5, position='jitter')+
   scale_y_log10()+
  scale_color_brewer(type='div')
